@@ -1,0 +1,4 @@
+com\example\users\controller\UserControllerTest.class
+com\example\users\service\UserServiceTest.class
+com\example\users\repository\UserRepositoryTest.class
+com\example\users\UsersApplicationTests.class
