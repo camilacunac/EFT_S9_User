@@ -86,7 +86,8 @@ public class UserController {
         List<User> users = userService.getAllUsers();
         return users.stream()
                 .map((User user) -> EntityModel.of(user,
-                        WebMvcLinkBuilder.linkTo(UserController.class).slash(user.getId()).withSelfRel()))
+                        WebMvcLinkBuilder.linkTo(UserController.class).slash("/user").slash(user.getId())
+                                .withSelfRel()))
                 .collect(Collectors.toList());
     }
 
