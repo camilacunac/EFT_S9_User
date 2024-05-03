@@ -3,8 +3,10 @@ package com.example.users.repository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,32 @@ class UserRepositoryTest {
         // Verifica que el id existe y que el email coincida
         assertNotNull(savedUser.getId());
         assertEquals("test@gmail.com", savedUser.getEmail());
+    }
+
+    @Test
+    void getUserByIdTest() {
+        // Llamar al método getById() del repositorio
+        Optional<User> user = userRepository.findById(Long.parseLong("1"));
+
+        // Verificar que el usuario exista y que el email coincida
+        assertNotNull(user.get());
+        assertTrue(user.isPresent());
+        assertEquals("johndoe@example.com", user.get().getEmail());
+    }
+
+    @Test
+    void updateUserRoleTest() {
+        // Llamar al método getById() del repositorio
+        Optional<User> user = userRepository.findById(Long.parseLong("1"));
+
+        // Crear objeto usuario en base al usuario llamado y actualizar role
+        assertEquals("customer", user.get().getRole());
+        User userToUpdate = user.get();
+        userToUpdate.setRole("admin");
+
+        // Guardar actualizacion y validamos que coincida con lo actualizado
+        User updatedUser = userRepository.save(userToUpdate);
+        assertEquals("admin", updatedUser.getRole());
     }
 
 }

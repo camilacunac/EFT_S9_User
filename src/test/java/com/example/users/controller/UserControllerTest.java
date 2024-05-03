@@ -1,6 +1,7 @@
 package com.example.users.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import com.example.users.dto.UpdateUserRoleDTO;
 import com.example.users.model.User;
 import com.example.users.model.UserResponse;
 import com.example.users.service.UserServiceImpl;
@@ -88,6 +90,47 @@ class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error").value(""))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.response.email").value(newUser.getEmail()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.response.role").value(newUser.getRole()));
+    }
+
+    @Test
+    void getUserByIdTest() throws Exception {
+        // Arrange
+        Long userId = 1L;
+        User user = new User("johndoe@example.com", "password123", "customer", "123 Main St, Cityville");
+        UserResponse userResponse = new UserResponse("success", user, "");
+        ResponseEntity<UserResponse> serviceResponse = ResponseEntity.ok(userResponse);
+
+        // Act
+        when(userServiceMock.getUserById(userId)).thenReturn(serviceResponse);
+
+        // Assert
+        mockMvc.perform(MockMvcRequestBuilders.get("/user/{id}", userId))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.state").value("success"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error").value(""))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.response.email").value(user.getEmail()));
+    }
+
+    @Test
+    void updateUserRoleTest() throws Exception {
+        // Arange
+        Long userId = 1L;
+        User user = new User("johndoe@example.com", "password123", "customer", "123 Main St, Cityville");
+        user.setRole("admin");
+        UserResponse userResponse = new UserResponse("success", user, "");
+        ResponseEntity<UserResponse> serviceResponse = ResponseEntity.ok(userResponse);
+
+        // Act
+        when(userServiceMock.isValidRole("admin")).thenReturn(true);
+        when(userServiceMock.updateUserRole(eq(userId), any(UpdateUserRoleDTO.class))).thenReturn(serviceResponse);
+
+        // Assert
+        mockMvc.perform(MockMvcRequestBuilders.put("/user/{idUser}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"role\": \"admin\" }"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.state").value("success"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.response.role").value(user.getRole()));
     }
 
 }

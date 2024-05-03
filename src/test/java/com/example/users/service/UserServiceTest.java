@@ -1,11 +1,14 @@
 package com.example.users.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.example.users.dto.UpdateUserRoleDTO;
 import com.example.users.model.User;
 import com.example.users.model.UserResponse;
 import com.example.users.repository.UserRepository;
@@ -73,5 +77,42 @@ class UserServiceTest {
         assertEquals("success", response.getBody().getState());
         assertEquals(newUser, response.getBody().getResponse());
         assertTrue(response.getBody().getError().isEmpty());
+    }
+
+    @Test
+    void getUserByIdTest() {
+        // Arrange
+        Long userId = 1L;
+        User mockUser = new User("johndoe@example.com", "password123", "customer", "123 Main St, Cityville");
+        mockUser.setId(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+
+        // Act
+        ResponseEntity<UserResponse> response = userService.getUserById(userId);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("success", response.getBody().getState());
+        assertEquals(mockUser, response.getBody().getResponse());
+    }
+
+    @Test
+    void updateUserRoleTest() {
+        // Arrange
+        Long userId = 1L;
+        User mockUser = new User("johndoe@example.com", "password123", "customer", "123 Main St, Cityville");
+
+        // Act
+        UpdateUserRoleDTO roleDTO = new UpdateUserRoleDTO("admin");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        mockUser.setRole("admin");
+        when(userRepository.save(mockUser)).thenReturn(mockUser);
+        ResponseEntity<UserResponse> response = userService.updateUserRole(userId, roleDTO);
+
+        // Assert
+        assertNotNull(response.getBody());
+        assertEquals("success", response.getBody().getState());
+        assertEquals("admin", response.getBody().getResponse().getRole());
     }
 }
